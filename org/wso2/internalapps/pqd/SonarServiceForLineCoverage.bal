@@ -48,6 +48,9 @@ service<http> LineCoverageService {
 
 function getAltAreaLineCoverage() (json){
     endpoint<sql:ClientConnector> sqlEndPoint{}
+    json data = {"error":false};
+    json allAreas = {"items":[], "line-coverage":{}};
+    return data;
 }
 
 function saveLineCoverageToDatabase (json projects,string path,json configData)  {
@@ -65,6 +68,8 @@ function saveLineCoverageToDatabase (json projects,string path,json configData) 
         log:printInfo("Fetching data from SonarQube started at " + currentTime().format("yyyy-MM-dd  HH:mm:ss") + ". There are " + lengthOfProjectList + " sonar projectts for this time.");
         sql:Parameter todayDate = {sqlType:sql:Type.VARCHAR, value:customStartTimeString};
         params = [todayDate];
+
+
     }
 }
 
