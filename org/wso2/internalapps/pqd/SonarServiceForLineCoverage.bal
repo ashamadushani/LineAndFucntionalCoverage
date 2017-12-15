@@ -104,6 +104,9 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
                     var line_coverage,_ = (float)lineCoveragePerProject.line_coverage;
                     float covered_iles = lines_to_cover - uncovered_lines;
 
+                    sql:Parameter lines_to_cover_para = {sqlType:sql:Type.FLOAT,value:lines_to_cover};
+                    sql:Parameter uncovered_linese_para={sqlType:sql:Type.FLOAT,value:uncoverede_lines};
+
                 }
             }commited{
                 string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
