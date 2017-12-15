@@ -65,7 +65,6 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
         sql:Parameter[] params = [];
 
         string customStartTimeString = currentTime().format("yyyy-MM-dd");
-        log:printInfo("Fetching data from SonarQube started at " + currentTime().format("yyyy-MM-dd  HH:mm:ss") + ". There are " + lengthOfProjectList + " sonar projectts for this time.");
         sql:Parameter todayDate = {sqlType:sql:Type.VARCHAR, value:customStartTimeString};
         params = [todayDate];
 
@@ -91,7 +90,7 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
 
             sql:Parameter snapshotid = {sqlType:sql:Type.INTEGER, value:snapshot_id};
             int index = 0;
-
+            log:printInfo("Fetching data from SonarQube started at " + currentTime().format("yyyy-MM-dd  HH:mm:ss") + ". There are " + lengthOfProjectList + " sonar projectts for this time.");
             transaction {
                 while (index < lengthOfProjectList) {
                     var project_key, _ = (string)projects[index].k;
@@ -99,13 +98,14 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
                     log:printInfo(index + 1 + ":" + "Fetching line coverage details for project " + project_key);
                     json lineCoveragePerProject = getLineCoveragePerProjectFromSonar(project_key, sonarcon, configData);
 
-                    var lines_to_cover,_ = (float)lineCoveragePerProject.lines_to_cover;
-                    var uncovered_lines,_ = (float)lineCoveragePerProject.uncovered_lines;
-                    var line_coverage,_ = (float)lineCoveragePerProject.line_coverage;
-                    float covered_lines = lines_to_cover - uncovered_lines;
                     var emptyJson,_ =(boolean)lineCoveragePerProject.error;
 
                     if(!emptyJson){
+                        var lines_to_cover,_ = (float)lineCoveragePerProject.lines_to_cover;
+                        var uncovered_lines,_ = (float)lineCoveragePerProject.uncovered_lines;
+                        var line_coverage,_ = (float)lineCoveragePerProject.line_coverage;
+                        float covered_lines = lines_to_cover - uncovered_lines;
+
                         sql:Parameter lines_to_cover_para = {sqlType:sql:Type.FLOAT,value:lines_to_cover};
                         sql:Parameter covered_lines_para={sqlType:sql:Type.FLOAT,value:covered_lines};
                         sql:Parameter uncovered_linese_para={sqlType:sql:Type.FLOAT,value:uncovered_lines};
@@ -113,7 +113,7 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
 
                         params = [snapshotid, todayDate, projectkey, lines_to_cover_para,covered_lines_para,uncovered_linese_para,line_coverage_para];
                         log:printInfo("Line coverage details were recoded successfully..");
-                        int ret1 = sqlEndPoint.update(INSERT_SONAR_ISSUES, params);
+                        int ret1 = sqlEndPoint.update(INSERT_DAILY_LINE_COVERAGE_DETAILS, params);
                     }
 
                     index = index + 1;
