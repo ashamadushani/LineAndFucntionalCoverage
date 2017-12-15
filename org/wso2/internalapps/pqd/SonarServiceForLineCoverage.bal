@@ -105,14 +105,21 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
                     float covered_iles = lines_to_cover - uncovered_lines;
 
                     sql:Parameter lines_to_cover_para = {sqlType:sql:Type.FLOAT,value:lines_to_cover};
+                    sql:Parameter covered_lines_para={sqlType:sql:Type.FLOAT,value:covered_iles};
                     sql:Parameter uncovered_linese_para={sqlType:sql:Type.FLOAT,value:uncoverede_lines};
+                    sql:Parameter line_coverage_para={sqlType:sql:Type.FLOAT,value:line_coverage};
 
+                    params = [snapshotid, todayDate, projectkey, lines_to_cover_para,covered_lines_para,uncovered_linese_para,line_coverage_para];
+                    log:printInfo("Line coverage details were recoded successfully..");
+                    int ret1 = sqlEndPoint.update(INSERT_SONAR_ISSUES, params);
+                    index = index + 1;
                 }
             }commited{
                 string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
                 log:printInfo("Data fetching from sonar finished at " + customEndTimeString);
             }
         }
+        sqlEndPoint.close();
     }
 }
 
