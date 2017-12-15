@@ -41,7 +41,9 @@ service<http> LineCoverageService {
         path:"/"
     }
     resource getAllAreaLineCoverage(http:Request request, http:Response response){
-
+        json returnJson=getAltAreaLineCoverage();
+        response.setJsonPayload(returnJson);
+        _ = response.send();
     }
 }
 
@@ -150,7 +152,6 @@ function getLineCoveragePerProjectFromSonar(string project_key,http:HttpClient s
     }catch(error err){
         log:printError(err.msg);
     }
-    println(returnJson);
     return returnJson;
 }
 
