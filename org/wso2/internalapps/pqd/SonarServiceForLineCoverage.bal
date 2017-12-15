@@ -53,7 +53,7 @@ function getAltAreaLineCoverage() (json){
     return data;
 }
 
-function saveLineCoverageToDatabase (json projects,string path,json configData)  {
+function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json configData)  {
     endpoint<sql:ClientConnector> sqlEndPoint {}
 
     worker issuesRecordingWorker {
@@ -69,7 +69,47 @@ function saveLineCoverageToDatabase (json projects,string path,json configData) 
         sql:Parameter todayDate = {sqlType:sql:Type.VARCHAR, value:customStartTimeString};
         params = [todayDate];
 
+        int ret =0;
+        try{
+            ret=sqlEndPoint.update(INSERT_LINECOVERAGE_SNAPSHOT_DETAILS, params);
+        }catch(error conErr){
+            log:printError(conErr.msg);
+        }
 
+        if(ret != 0){
+            params = [];
+            datatable dt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID, params);
+            LinecoverageSnapshots ss;
+            int snapshot_id;
+            TypeCastError err;
+            while (dt.hasNext()) {
+                any row = dt.getNext();
+                ss, err = (LinecoverageSnapshots )row;
+                snapshot_id = ss.snapshot_id;
+            }
+            dt.close();
+
+            sql:Parameter snapshotid = {sqlType:sql:Type.INTEGER, value:snapshot_id};
+            int index = 0;
+
+            transaction {
+                while (index < lengthOfProjectList) {
+                    var project_key, _ = (string)projects[index].k;
+                    sql:Parameter projectkey = {sqlType:sql:Type.VARCHAR, value:project_key};
+                    log:printInfo(index + 1 + ":" + "Fetching line coverage details for project " + project_key);
+                    json lineCoveragePerProject = getLineCoveragePerProjectFromSonar(project_key, sonarcon, configData);
+
+                    var lines_to_cover,_ = (float)lineCoveragePerProject.lines_to_cover;
+                    var uncovered_lines,_ = (float)lineCoveragePerProject.uncovered_lines;
+                    var line_coverage,_ = (float)lineCoveragePerProject.line_coverage;
+                    float covered_iles = lines_to_cover - uncovered_lines;
+
+                }
+            }commited{
+                string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
+                log:printInfo("Data fetching from sonar finished at " + customEndTimeString);
+            }
+        }
     }
 }
 
