@@ -58,23 +58,23 @@ service<http> LineCoverageService {
 
     @http:resourceConfig {
         methods:["GET"],
-        path:"/"
+        path:"/line-coverage/all"
     }
     resource getAllAreaLineCoverage(http:Request request, http:Response response){
-        json returnJson=getAltAreaLineCoverage();
+        json returnJson= getAllAreaLineCoverage();
         response.setJsonPayload(returnJson);
         _ = response.send();
     }
 }
 
 
-function getAltAreaLineCoverage() (json){
+function getAllAreaLineCoverage () (json) {
     endpoint<sql:ClientConnector> sqlEndPoint{}
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
 
     json data = {"error":false};
-    json lineCoverage = {"items":[],"line-coverage":{}};
+    json lineCoverage = {"items":[],"line_cov":{}};
     sql:Parameter[] params = [];
 
     datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
@@ -120,26 +120,31 @@ function getAltAreaLineCoverage() (json){
             datatable ldt = sqlEndPoint.select(GET_LINE_COVERAGE_DETAILS, params);
             LineCoverageDetails lcd;
             while (ldt.hasNext()) {
-                any row2 = idt.getNext();
+                any row2 = ldt.getNext();
                 lcd, err = (LineCoverageDetails )row2;
                 lines_to_cover=lcd.lines_to_cover+lines_to_cover;
                 covered_lines=lcd.covered_lines+covered_lines;
                 uncovered_lines=lcd.uncovered_lines+uncovered_lines;
-                line_coevrage=lcd.line_coverage+line_coevrage;
             }
             ldt.close();
         }
         cdt.close();
+        if(lines_to_cover!=0){
+                line_coevrage=((float)covered_lines/(float)lines_to_cover)*100;
+        }
         allAreaLinesToCover=allAreaLinesToCover+lines_to_cover;
         allAreaCoveredLines=allAreaCoveredLines+covered_lines;
         allAreaUncoveredLines=allAreaUncoveredLines+uncovered_lines;
-        allAreaLineCoverage=allAreaLineCoverage+line_coevrage;
+        if(allAreaLinesToCover!=0){
+                allAreaLineCoverage=((float)allAreaCoveredLines /(float)allAreaLinesToCover) * 100;
+        }
         json area_line_coverage = {"name":area_name, "id":area_id, "lc":{"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
                                                                         "uncovered_lines":uncovered_lines,"line_coverage":line_coevrage}};
         lineCoverage.items[lengthof lineCoverage.items]=area_line_coverage;
     }
     dt.close();
-    lineCoverage.line-coverage = {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines, "sonar":BUGS};
+    lineCoverage.line_cove = {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines,
+                                 "uncovered_lines":allAreaUncoveredLines,"line_coverage":allAreaLineCoverage};
 
 
     data.data=lineCoverage;
@@ -185,7 +190,7 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
             sql:Parameter snapshotid = {sqlType:sql:Type.INTEGER, value:snapshot_id};
             int index = 0;
             log:printInfo("Fetching data from SonarQube started at " + currentTime().format("yyyy-MM-dd  HH:mm:ss") + ". There are " + lengthOfProjectList + " sonar projectts for this time.");
-            transaction {
+            //transaction {
                 while (index < lengthOfProjectList) {
                     var project_key, _ = (string)projects[index].k;
                     sql:Parameter projectkey = {sqlType:sql:Type.VARCHAR, value:project_key};
@@ -212,10 +217,10 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
 
                     index = index + 1;
                 }
-            }committed{
+            //}committed{
                 string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
                 log:printInfo("Data fetching from sonar finished at " + customEndTimeString);
-            }
+            //}
         }
         sqlEndPoint.close();
     }
