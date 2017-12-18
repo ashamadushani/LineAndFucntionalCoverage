@@ -18,6 +18,11 @@ struct Components{
     string sonar_project_key;
 }
 
+struct Products{
+    int pqd_product_id;
+    string pqd_product_name;
+}
+
 struct LinecoverageSnapshots{
     int snapshot_id;
 }
@@ -58,10 +63,23 @@ service<http> LineCoverageService {
 
     @http:resourceConfig {
         methods:["GET"],
-        path:"/line-coverage/all"
+        path:"/{category}/{categoryId}"
     }
-    resource getAllAreaLineCoverage(http:Request request, http:Response response){
-        json returnJson= getAllAreaLineCoverage();
+    resource getLineCoverage(http:Request request, http:Response response,string category, string categoryId){
+        var selected,_=<int>categoryId;
+        json returnJson;
+        if(category=="all"){
+           returnJson = getAllAreaLineCoverage();
+        }else if(category=="area"){
+            returnJson=getSelectedAreaLineCoverage(selected);
+        }else if(category=="product"){
+            returnJson=getSelectedProductLineCoverage(selected);
+        }else if(category=="component"){
+            returnJson=getSelectedComponentLineCoverage(selected);
+        }else{
+            returnJson={"error":true};
+        }
+
         response.setJsonPayload(returnJson);
         _ = response.send();
     }
@@ -102,7 +120,6 @@ function getAllAreaLineCoverage () (json) {
 
         int lines_to_cover=0; int covered_lines=0; int uncovered_lines=0; float line_coevrage=0.0;
 
-        int sonars=0;
         sql:Parameter pqd_area_id_para = {sqlType:sql:Type.INTEGER, value:area_id};
         params = [pqd_area_id_para];
         datatable cdt = sqlEndPoint.select(GET_COMPONENT_OF_AREA , params);
@@ -143,7 +160,7 @@ function getAllAreaLineCoverage () (json) {
         lineCoverage.items[lengthof lineCoverage.items]=area_line_coverage;
     }
     dt.close();
-    lineCoverage.line_cove = {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines,
+    lineCoverage.line_cov= {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines,
                                  "uncovered_lines":allAreaUncoveredLines,"line_coverage":allAreaLineCoverage};
 
 
@@ -171,26 +188,28 @@ function getSelectedAreaLineCoverage (int areaId) (json) {
         snapshot_id= ss.snapshot_id;
     }
     ssdt.close();
-    sql:Parameter areaIdPara={sqlType:sql:Type.INTEGER,value:areaId};
-    params=[areaIdPara]
-    int allAreaLinesToCover=0; int allAreaCoveredLines=0; int allAreaUncoveredLines=0; float allAreaLineCoverage=0.0;
 
-    datatable dt = sqlEndPoint.select(GET_ALL_AREAS, params);
-    Areas area;
+    sql:Parameter areaIdPara={sqlType:sql:Type.INTEGER,value:areaId};
+    params=[areaIdPara];
+
+    int selectedAreaLinesToCover = 0; int selectedAreaCoveredLines = 0;
+    int selectedAreaUncoveredLines = 0; float selectedAreaLineCoverage = 0.0;
+
+    datatable dt = sqlEndPoint.select(GET_PRODUCTS_OF_AREA, params);
+    Products product;
 
     while(dt.hasNext()) {
         any row1 =dt.getNext();
-        area, err = (Areas)row1;
+        product, err = (Products)row1;
 
-        string area_name = area.pqd_area_name;
-        int area_id = area.pqd_area_id;
+        string product_name = product.pqd_product_name;
+        int product_id = product.pqd_product_id;
 
         int lines_to_cover=0; int covered_lines=0; int uncovered_lines=0; float line_coevrage=0.0;
 
-        int sonars=0;
-        sql:Parameter pqd_area_id_para = {sqlType:sql:Type.INTEGER, value:area_id};
-        params = [pqd_area_id_para];
-        datatable cdt = sqlEndPoint.select(GET_COMPONENT_OF_AREA , params);
+        sql:Parameter pqd_product_id_para = {sqlType:sql:Type.INTEGER, value:product_id};
+        params = [pqd_product_id_para];
+        datatable cdt = sqlEndPoint.select(GET_COMPONENT_OF_PRODUCT , params);
         Components comps;
         while (cdt.hasNext()) {
             any row0 = cdt.getNext();
@@ -217,25 +236,198 @@ function getSelectedAreaLineCoverage (int areaId) (json) {
         if(lines_to_cover!=0){
             line_coevrage=((float)covered_lines/(float)lines_to_cover)*100;
         }
-        allAreaLinesToCover=allAreaLinesToCover+lines_to_cover;
-        allAreaCoveredLines=allAreaCoveredLines+covered_lines;
-        allAreaUncoveredLines=allAreaUncoveredLines+uncovered_lines;
-        if(allAreaLinesToCover!=0){
-            allAreaLineCoverage=((float)allAreaCoveredLines /(float)allAreaLinesToCover) * 100;
+        selectedAreaLinesToCover = selectedAreaLinesToCover + lines_to_cover;
+        selectedAreaCoveredLines = selectedAreaCoveredLines + covered_lines;
+        selectedAreaUncoveredLines = selectedAreaUncoveredLines + uncovered_lines;
+        if(selectedAreaLinesToCover != 0) {
+            selectedAreaLineCoverage = ((float)selectedAreaCoveredLines / (float)selectedAreaLinesToCover) * 100;
         }
-        json area_line_coverage = {"name":area_name, "id":area_id, "lc":{"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+        json product_line_coverage = {"name":product_name, "id":product_id, "lc":{"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
                                                                             "uncovered_lines":uncovered_lines,"line_coverage":line_coevrage}};
-        lineCoverage.items[lengthof lineCoverage.items]=area_line_coverage;
+        lineCoverage.items[lengthof lineCoverage.items]=product_line_coverage;
     }
     dt.close();
-    lineCoverage.line_cove = {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines,
-                                 "uncovered_lines":allAreaUncoveredLines,"line_coverage":allAreaLineCoverage};
+    lineCoverage.line_cov= {"lines_to_cover":selectedAreaLinesToCover, "covered_lines":selectedAreaCoveredLines,
+                                 "uncovered_lines":selectedAreaUncoveredLines, "line_coverage":selectedAreaLineCoverage};
 
 
     data.data=lineCoverage;
     sqlEndPoint.close();
     return data;
 }
+
+function getSelectedProductLineCoverage (int productId) (json) {
+    endpoint<sql:ClientConnector> sqlEndPoint{}
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false};
+    json lineCoverage = {"items":[],"line_cov":{}};
+    sql:Parameter[] params = [];
+
+    datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
+    LinecoverageSnapshots ss;
+    int snapshot_id;
+    TypeCastError err;
+    while (ssdt.hasNext()) {
+        any row = ssdt.getNext();
+        ss, err = (LinecoverageSnapshots)row;
+        snapshot_id= ss.snapshot_id;
+    }
+    ssdt.close();
+
+
+    int selectedProductLinesToCover = 0; int selectedProductCoveredLines = 0;
+    int selectedProductUncoveredLines = 0; float selectedProductLineCoverage = 0.0;
+
+    sql:Parameter pqd_product_id_para = {sqlType:sql:Type.INTEGER, value:productId};
+    params = [pqd_product_id_para];
+    datatable cdt = sqlEndPoint.select(GET_COMPONENT_OF_PRODUCT , params);
+    Components comps;
+    while (cdt.hasNext()) {
+        any row0 = cdt.getNext();
+        comps, err = (Components)row0;
+
+        string component_name=comps.pqd_component_name;
+        string project_key = comps.sonar_project_key;
+        int component_id = comps.pqd_component_id;
+
+        int lines_to_cover=0; int covered_lines=0; int uncovered_lines=0; float line_coevrage=0.0;
+
+        sql:Parameter sonar_project_key_para = {sqlType:sql:Type.VARCHAR, value:project_key};
+        sql:Parameter snapshot_id_para = {sqlType:sql:Type.INTEGER, value:snapshot_id};
+        params = [sonar_project_key_para,snapshot_id_para];
+        datatable ldt = sqlEndPoint.select(GET_LINE_COVERAGE_DETAILS, params);
+        LineCoverageDetails lcd;
+        while (ldt.hasNext()) {
+            any row2 = ldt.getNext();
+            lcd, err = (LineCoverageDetails )row2;
+            lines_to_cover=lcd.lines_to_cover;
+            covered_lines=lcd.covered_lines;
+            uncovered_lines=lcd.uncovered_lines;
+        }
+        ldt.close();
+        if(lines_to_cover!=0){
+            line_coevrage=((float)covered_lines/(float)lines_to_cover)*100;
+        }
+        json component_line_coverage = {"name":component_name, "id":component_id, "lc":{"lines_to_cover":lines_to_cover, "covered_lines":covered_lines,
+                                                                                       "uncovered_lines":uncovered_lines,"line_coverage":line_coevrage}};
+        lineCoverage.items[lengthof lineCoverage.items]= component_line_coverage;
+        selectedProductLinesToCover = selectedProductLinesToCover + lines_to_cover;
+        selectedProductCoveredLines = selectedProductCoveredLines + covered_lines;
+        selectedProductUncoveredLines = selectedProductUncoveredLines + uncovered_lines;
+    }
+    cdt.close();
+
+    if(selectedProductLinesToCover != 0) {
+        selectedProductLineCoverage = ((float)selectedProductCoveredLines / (float)selectedProductLinesToCover) * 100;
+    }
+
+    lineCoverage.line_cov= {"lines_to_cover":selectedProductLinesToCover, "covered_lines":selectedProductCoveredLines,
+                                 "uncovered_lines":selectedProductUncoveredLines, "line_coverage":selectedProductLineCoverage};
+
+    data.data=lineCoverage;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getSelectedComponentLineCoverage (int componentId) (json) {
+    endpoint<sql:ClientConnector> sqlEndPoint{}
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false};
+    json lineCoverage = {"items":[],"line_cov":{}};
+    sql:Parameter[] params = [];
+
+    datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
+    LinecoverageSnapshots ss;
+    int snapshot_id;
+    TypeCastError err;
+    while (ssdt.hasNext()) {
+        any row = ssdt.getNext();
+        ss, err = (LinecoverageSnapshots)row;
+        snapshot_id= ss.snapshot_id;
+    }
+    ssdt.close();
+
+
+    int selectedComponentLinesToCover = 0; int selectedComponentCoveredLines = 0;
+    int selectedComponentUncoveredLines = 0; float selectedComponentLineCoverage = 0.0;
+
+    sql:Parameter pqd_product_id_para = {sqlType:sql:Type.INTEGER, value:componentId};
+    params = [pqd_product_id_para];
+    datatable cdt = sqlEndPoint.select(GET_DETAILS_OF_COMPONENT , params);
+    Components comps;
+    while (cdt.hasNext()) {
+        any row0 = cdt.getNext();
+        comps, err = (Components)row0;
+
+        string project_key = comps.sonar_project_key;
+
+        sql:Parameter sonar_project_key_para = {sqlType:sql:Type.VARCHAR, value:project_key};
+        sql:Parameter snapshot_id_para = {sqlType:sql:Type.INTEGER, value:snapshot_id};
+        params = [sonar_project_key_para,snapshot_id_para];
+        datatable ldt = sqlEndPoint.select(GET_LINE_COVERAGE_DETAILS, params);
+        LineCoverageDetails lcd;
+        while (ldt.hasNext()) {
+            any row2 = ldt.getNext();
+            lcd, err = (LineCoverageDetails )row2;
+            selectedComponentLinesToCover=lcd.lines_to_cover;
+            selectedComponentCoveredLines=lcd.covered_lines;
+            selectedComponentUncoveredLines=lcd.uncovered_lines;
+        }
+        ldt.close();
+        if(selectedComponentLinesToCover != 0) {
+            selectedComponentLineCoverage = ((float)selectedComponentCoveredLines / (float)selectedComponentLinesToCover) * 100;
+        }
+    }
+    cdt.close();
+
+    lineCoverage.line_cov= {"lines_to_cover":selectedComponentLinesToCover, "covered_lines":selectedComponentCoveredLines,
+                                 "uncovered_lines":selectedComponentUncoveredLines, "line_coverage":selectedComponentLineCoverage};
+
+    data.data=lineCoverage;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyLineCoverageHistoryForAllArea(){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+}
+
+function getDailyHistoryForAllArea (string start, string end) (json) {
+
+
+json data = {"error":false,"data":[]};
+json allAreas = {"data":[]};
+
+sql:Parameter[] params = [];
+TypeCastError err;
+sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+params = [start_date_para,end_date_para];
+                          datatable idt = sqlEndPoint.select(GET_DAILY_HISTORY_FOR_ALL_AREA, params);
+DailySonarIssues dsi;
+
+while (idt.hasNext()) {
+any row2 = idt.getNext();
+dsi, err = (DailySonarIssues)row2;
+float tot = dsi.total;
+string date= dsi.date;
+json history={"date":date,"count":tot};
+allAreas.data[lengthof allAreas.data]=history;
+}
+idt.close();
+
+data.data=allAreas.data;
+sqlEndPoint.close();
+return data;
+       }
 
 function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json configData)  {
     endpoint<sql:ClientConnector> sqlEndPoint {}
