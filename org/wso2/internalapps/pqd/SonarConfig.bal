@@ -1959,3 +1959,6 @@ const string GET_LINECOVERAGE_SNAPSHOT_ID="SELECT snapshot_id FROM line_coverage
 
 const string INSERT_DAILY_LINE_COVERAGE_DETAILS="INSERT INTO daily_line_coverage (snapshot_id,date,sonar_project_key,lines_to_cover,"+
                                                 "covered_lines,uncovered_lines,line_coverage) VALUES (?,?,?,?,?,?,?)";
+
+const string GET_LINE_COVERAGE_DETAILS="SELECT lines_to_cover,covered_lines,uncovered_lines,line_coverage FROM "+
+                                        "daily_line_coverage where sonar_project_key=? and snapshot_id=?";
