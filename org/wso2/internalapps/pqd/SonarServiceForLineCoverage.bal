@@ -33,6 +33,13 @@ struct LineCoverageDetails{
     int uncovered_lines;
     float line_coverage;
 }
+struct DailyLineCoverage{
+    string date;
+    int lines_to_cover;
+    int covered_lines;
+    int uncovered_lines;
+    float line_coverage;
+}
 
 @http:configuration {
     basePath:"/internal/product-quality/v1.0/line-coverage",
@@ -76,6 +83,73 @@ service<http> LineCoverageService {
             returnJson=getSelectedProductLineCoverage(selected);
         }else if(category=="component"){
             returnJson=getSelectedComponentLineCoverage(selected);
+        }else{
+            returnJson={"error":true};
+        }
+
+        response.setJsonPayload(returnJson);
+        _ = response.send();
+    }
+
+    @http:resourceConfig {
+        methods:["GET"],
+        path:"/history/{category}/{categoryId}"
+    }
+    resource getLineCoverageHistory(http:Request request,http:Response response, string category, string categoryId){
+        json returnJson;
+        map params = request.getQueryParams();
+        var start,_=(string)params.dateFrom;
+        var end,_=(string)params.dateTo;
+        var period,_=(string)params.period;
+        var selected,_=<int>categoryId;
+        if(category=="all"){
+            if(period=="day"){
+                returnJson=getDailyLineCoverageHistoryForAllArea(start,end);
+            }else if(period=="Month"){
+
+            }else if(period=="Quarter"){
+
+            }else if(period=="Year"){
+
+            }else{
+                returnJson={"error":true};
+            }
+        }else if(category=="area"){
+            if(period=="day"){
+
+            }else if(period=="Month"){
+
+            }else if(period=="Quarter"){
+
+            }else if(period=="Year"){
+
+            }else{
+                returnJson={"error":true};
+            }
+        }else if(category=="product"){
+            if(period=="day"){
+
+            }else if(period=="Month"){
+
+            }else if(period=="Quarter"){
+
+            }else if(period=="Year"){
+
+            }else{
+                returnJson={"error":true};
+            }
+        }else if(category=="component"){
+            if(period=="day"){
+
+            }else if(period=="Month"){
+
+            }else if(period=="Quarter"){
+
+            }else if(period=="Year"){
+
+            }else{
+                returnJson={"error":true};
+            }
         }else{
             returnJson={"error":true};
         }
@@ -392,42 +466,41 @@ function getSelectedComponentLineCoverage (int componentId) (json) {
     return data;
 }
 
-function getDailyLineCoverageHistoryForAllArea(){
+function getDailyLineCoverageHistoryForAllArea(string start,string end)(json){
     endpoint<sql:ClientConnector> sqlEndPoint {
     }
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_ALL_AREA_DAILY_LINE_COVERAGE, params);
+    DailyLineCoverage dlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        dlc,err=(DailyLineCoverage )row;
+        string date= dlc.date;
+        int lines_to_cover=dlc.lines_to_cover;
+        int covered_lines=dlc.covered_lines;
+        int uncovered_lines=dlc.uncovered_lines;
+        float line_coverage=dlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        allAreasLineCoverage.data[lengthof allAreasLineCoverage.data]=history;
+    }
+    ldt.close();
+
+    data.data=allAreasLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
 }
-
-function getDailyHistoryForAllArea (string start, string end) (json) {
-
-
-json data = {"error":false,"data":[]};
-json allAreas = {"data":[]};
-
-sql:Parameter[] params = [];
-TypeCastError err;
-sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
-sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
-params = [start_date_para,end_date_para];
-                          datatable idt = sqlEndPoint.select(GET_DAILY_HISTORY_FOR_ALL_AREA, params);
-DailySonarIssues dsi;
-
-while (idt.hasNext()) {
-any row2 = idt.getNext();
-dsi, err = (DailySonarIssues)row2;
-float tot = dsi.total;
-string date= dsi.date;
-json history={"date":date,"count":tot};
-allAreas.data[lengthof allAreas.data]=history;
-}
-idt.close();
-
-data.data=allAreas.data;
-sqlEndPoint.close();
-return data;
-       }
 
 function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json configData)  {
     endpoint<sql:ClientConnector> sqlEndPoint {}

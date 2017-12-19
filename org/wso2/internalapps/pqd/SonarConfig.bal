@@ -1962,3 +1962,39 @@ const string INSERT_DAILY_LINE_COVERAGE_DETAILS="INSERT INTO daily_line_coverage
 
 const string GET_LINE_COVERAGE_DETAILS="SELECT lines_to_cover,covered_lines,uncovered_lines,line_coverage FROM "+
                                         "daily_line_coverage where sonar_project_key=? and snapshot_id=?";
+
+const string GET_ALL_AREA_DAILY_LINE_COVERAGE="SELECT date,SUM(lines_to_cover) as lines_to_cover,SUM(covered_lines) as "
+                                              +"covered_lines,SUM(uncovered_lines) as uncovered_lines,"+
+                                              "(SUM(covered_lines)/SUM(lines_to_cover))*100 as line_coverage FROM "+
+                                              "daily_line_coverage as a INNER JOIN pqd_component as b "+
+                                              "ON a.sonar_project_key=b.sonar_project_key where date between ? and ? group by date";
+
+const string GET_ALL_AREA_MONTHLY_LINE_COVERAGE="SELECT year(date) as year,month(date) as month,AVG(lines_to_cover) as "+
+                                                "lines_to_cover,AVG(covered_lines) as covered_lines,AVG(uncovered_lines) "+
+                                                "as uncovered_lines,(AVG(covered_lines)/AVG(lines_to_cover))*100 as line_coverage "+
+                                                "FROM(SELECT date,SUM(lines_to_cover) as lines_to_cover,SUM(covered_lines) "+
+                                                "as covered_lines,SUM(uncovered_lines) as uncovered_lines,"+
+                                                "(SUM(covered_lines)/SUM(lines_to_cover))*100 as line_coverage "+
+                                                "FROM daily_line_coverage as a INNER JOIN pqd_component as b "+
+                                                "ON a.sonar_project_key=b.sonar_project_key where date between ? and ? "+
+                                                "group by date) as T group by year,month";
+
+const string GET_ALL_AREA_QUARTERLY_LINE_COVERAGE="SELECT year(date) as year,quarter(date) as quarter,AVG(lines_to_cover) as "+
+                                                "lines_to_cover,AVG(covered_lines) as covered_lines,AVG(uncovered_lines) "+
+                                                "as uncovered_lines,(AVG(covered_lines)/AVG(lines_to_cover))*100 as line_coverage "+
+                                                "FROM(SELECT date,SUM(lines_to_cover) as lines_to_cover,SUM(covered_lines) "+
+                                                "as covered_lines,SUM(uncovered_lines) as uncovered_lines,"+
+                                                "(SUM(covered_lines)/SUM(lines_to_cover))*100 as line_coverage "+
+                                                "FROM daily_line_coverage as a INNER JOIN pqd_component as b "+
+                                                "ON a.sonar_project_key=b.sonar_project_key where date between ? and ? "+
+                                                "group by date) as T group by year,quarter";
+
+const string GET_ALL_AREA_YEARLY_LINE_COVERAGE="SELECT year(date) as year,AVG(lines_to_cover) as "+
+                                                  "lines_to_cover,AVG(covered_lines) as covered_lines,AVG(uncovered_lines) "+
+                                                  "as uncovered_lines,(AVG(covered_lines)/AVG(lines_to_cover))*100 as line_coverage "+
+                                                  "FROM(SELECT date,SUM(lines_to_cover) as lines_to_cover,SUM(covered_lines) "+
+                                                  "as covered_lines,SUM(uncovered_lines) as uncovered_lines,"+
+                                                  "(SUM(covered_lines)/SUM(lines_to_cover))*100 as line_coverage "+
+                                                  "FROM daily_line_coverage as a INNER JOIN pqd_component as b "+
+                                                  "ON a.sonar_project_key=b.sonar_project_key where date between ? and ? "+
+                                                  "group by date) as T group by year";
