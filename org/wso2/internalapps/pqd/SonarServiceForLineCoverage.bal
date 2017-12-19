@@ -35,9 +35,35 @@ struct LineCoverageDetails{
 }
 struct DailyLineCoverage{
     string date;
-    int lines_to_cover;
-    int covered_lines;
-    int uncovered_lines;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct MonthlyLineCoverage{
+    int year;
+    int month;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct QuarterlyLineCoverage{
+    int year;
+    int quarter;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct YearlyLineCoverage{
+    int year;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
     float line_coverage;
 }
 
@@ -106,47 +132,47 @@ service<http> LineCoverageService {
             if(period=="day"){
                 returnJson=getDailyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Month"){
-
+                returnJson=getMonthlyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Quarter"){
-
+                returnJson=getQuarterlyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Year"){
-
+                returnJson=getYearlyLineCoverageHistoryForAllArea(start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="area"){
             if(period=="day"){
-
+                returnJson=getDailyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Month"){
-
+                returnJson=getMonthlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Quarter"){
-
+                returnJson=getQuarterlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Year"){
-
+                returnJson=getYearlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="product"){
             if(period=="day"){
-
+                returnJson=getDailyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Month"){
-
+                returnJson=getMonthlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Quarter"){
-
+                returnJson=getQuarterlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Year"){
-
+                returnJson=getYearlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="component"){
             if(period=="day"){
-
+                returnJson=getDailyLineCoverageHistoryForSelectedComponent(selected,start,end);
             }else if(period=="Month"){
-
+                returnJson=getMonthlyLineCoverageHistoryForSelectedComponent(selected,start,end);
             }else if(period=="Quarter"){
-
+                returnJson=getQuarterlyLineCoverageHistoryForSelectedComponent(selected,start,end);
             }else if(period=="Year"){
-
+                returnJson=getYearlyLineCoverageHistoryForSelectedComponent(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
@@ -466,6 +492,8 @@ function getSelectedComponentLineCoverage (int componentId) (json) {
     return data;
 }
 
+
+
 function getDailyLineCoverageHistoryForAllArea(string start,string end)(json){
     endpoint<sql:ClientConnector> sqlEndPoint {
     }
@@ -487,9 +515,9 @@ function getDailyLineCoverageHistoryForAllArea(string start,string end)(json){
         any row=ldt.getNext();
         dlc,err=(DailyLineCoverage )row;
         string date= dlc.date;
-        int lines_to_cover=dlc.lines_to_cover;
-        int covered_lines=dlc.covered_lines;
-        int uncovered_lines=dlc.uncovered_lines;
+        float lines_to_cover=dlc.lines_to_cover;
+        float covered_lines=dlc.covered_lines;
+        float uncovered_lines=dlc.uncovered_lines;
         float line_coverage=dlc.line_coverage;
         json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
                          "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
@@ -501,6 +529,560 @@ function getDailyLineCoverageHistoryForAllArea(string start,string end)(json){
     sqlEndPoint.close();
     return data;
 }
+
+function getMonthlyLineCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_ALL_AREA_MONTHLY_LINE_COVERAGE, params);
+    MonthlyLineCoverage mlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        mlc,err=(MonthlyLineCoverage)row;
+        string date= mlc.year+"-"+mlc.month;
+        float lines_to_cover=mlc.lines_to_cover;
+        float covered_lines=mlc.covered_lines;
+        float uncovered_lines=mlc.uncovered_lines;
+        float line_coverage=mlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        allAreasLineCoverage.data[lengthof allAreasLineCoverage.data]=history;
+    }
+    ldt.close();
+
+    data.data=allAreasLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyLineCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_ALL_AREA_QUARTERLY_LINE_COVERAGE, params);
+    QuarterlyLineCoverage qlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        qlc,err=(QuarterlyLineCoverage)row;
+        string date= qlc.year+"-Q"+qlc.quarter;
+        float lines_to_cover=qlc.lines_to_cover;
+        float covered_lines=qlc.covered_lines;
+        float uncovered_lines=qlc.uncovered_lines;
+        float line_coverage=qlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        allAreasLineCoverage.data[lengthof allAreasLineCoverage.data]=history;
+    }
+    ldt.close();
+
+    data.data=allAreasLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyLineCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_ALL_AREA_YEARLY_LINE_COVERAGE, params);
+    YearlyLineCoverage ylc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        ylc, err = (YearlyLineCoverage)row;
+        var date=<string> ylc.year;
+        float lines_to_cover= ylc.lines_to_cover;
+        float covered_lines= ylc.covered_lines;
+        float uncovered_lines= ylc.uncovered_lines;
+        float line_coverage= ylc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        allAreasLineCoverage.data[lengthof allAreasLineCoverage.data]=history;
+    }
+    ldt.close();
+
+    data.data=allAreasLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyLineCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_AREA_DAILY_LINE_COVERAGE, params);
+    DailyLineCoverage dlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        dlc,err=(DailyLineCoverage )row;
+        string date= dlc.date;
+        float lines_to_cover=dlc.lines_to_cover;
+        float covered_lines=dlc.covered_lines;
+        float uncovered_lines=dlc.uncovered_lines;
+        float line_coverage=dlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        areaLineCoverage.data[lengthof areaLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= areaLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyLineCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_AREA_MONTHLY_LINE_COVERAGE, params);
+    MonthlyLineCoverage mlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        mlc,err=(MonthlyLineCoverage)row;
+        string date= mlc.year+"-"+mlc.month;
+        float lines_to_cover=mlc.lines_to_cover;
+        float covered_lines=mlc.covered_lines;
+        float uncovered_lines=mlc.uncovered_lines;
+        float line_coverage=mlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        areaLineCoverage.data[lengthof areaLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= areaLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyLineCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_AREA_QUARTERLY_LINE_COVERAGE, params);
+    QuarterlyLineCoverage qlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        qlc,err=(QuarterlyLineCoverage)row;
+        string date= qlc.year+"-Q"+qlc.quarter;
+        float lines_to_cover=qlc.lines_to_cover;
+        float covered_lines=qlc.covered_lines;
+        float uncovered_lines=qlc.uncovered_lines;
+        float line_coverage=qlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        areaLineCoverage.data[lengthof areaLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= areaLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyLineCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_AREA_YEARLY_LINE_COVERAGE, params);
+    YearlyLineCoverage ylc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        ylc, err = (YearlyLineCoverage)row;
+        var date=<string> ylc.year;
+        float lines_to_cover= ylc.lines_to_cover;
+        float covered_lines= ylc.covered_lines;
+        float uncovered_lines= ylc.uncovered_lines;
+        float line_coverage= ylc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        areaLineCoverage.data[lengthof areaLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= areaLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyLineCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_PRODUCT_DAILY_LINE_COVERAGE, params);
+    DailyLineCoverage dlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        dlc,err=(DailyLineCoverage )row;
+        string date= dlc.date;
+        float lines_to_cover=dlc.lines_to_cover;
+        float covered_lines=dlc.covered_lines;
+        float uncovered_lines=dlc.uncovered_lines;
+        float line_coverage=dlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        productLineCoverage.data[lengthof productLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= productLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyLineCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_PRODUCT_MONTHLY_LINE_COVERAGE, params);
+    MonthlyLineCoverage mlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        mlc,err=(MonthlyLineCoverage)row;
+        string date= mlc.year+"-"+mlc.month;
+        float lines_to_cover=mlc.lines_to_cover;
+        float covered_lines=mlc.covered_lines;
+        float uncovered_lines=mlc.uncovered_lines;
+        float line_coverage=mlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        productLineCoverage.data[lengthof productLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= productLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyLineCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_PRODUCT_QUARTERLY_LINE_COVERAGE, params);
+    QuarterlyLineCoverage qlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        qlc,err=(QuarterlyLineCoverage)row;
+        string date= qlc.year+"-Q"+qlc.quarter;
+        float lines_to_cover=qlc.lines_to_cover;
+        float covered_lines=qlc.covered_lines;
+        float uncovered_lines=qlc.uncovered_lines;
+        float line_coverage=qlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        productLineCoverage.data[lengthof productLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= productLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyLineCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_PRODUCT_YEARLY_LINE_COVERAGE, params);
+    YearlyLineCoverage ylc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        ylc, err = (YearlyLineCoverage)row;
+        var date=<string> ylc.year;
+        float lines_to_cover= ylc.lines_to_cover;
+        float covered_lines= ylc.covered_lines;
+        float uncovered_lines= ylc.uncovered_lines;
+        float line_coverage= ylc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        productLineCoverage.data[lengthof productLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= productLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyLineCoverageHistoryForSelectedComponent(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json compLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_COMPONENT_DAILY_LINE_COVERAGE, params);
+    DailyLineCoverage dlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        dlc,err=(DailyLineCoverage )row;
+        string date= dlc.date;
+        float lines_to_cover=dlc.lines_to_cover;
+        float covered_lines=dlc.covered_lines;
+        float uncovered_lines=dlc.uncovered_lines;
+        float line_coverage=dlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        compLineCoverage.data[lengthof compLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= compLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyLineCoverageHistoryForSelectedComponent(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json compLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_COMPONENT_MONTHLY_LINE_COVERAGE, params);
+    MonthlyLineCoverage mlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        mlc,err=(MonthlyLineCoverage)row;
+        string date= mlc.year+"-"+mlc.month;
+        float lines_to_cover=mlc.lines_to_cover;
+        float covered_lines=mlc.covered_lines;
+        float uncovered_lines=mlc.uncovered_lines;
+        float line_coverage=mlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        compLineCoverage.data[lengthof compLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= compLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyLineCoverageHistoryForSelectedComponent(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json compLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_COMPONENT_QUARTERLY_LINE_COVERAGE, params);
+    QuarterlyLineCoverage qlc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        qlc,err=(QuarterlyLineCoverage)row;
+        string date= qlc.year+"-Q"+qlc.quarter;
+        float lines_to_cover=qlc.lines_to_cover;
+        float covered_lines=qlc.covered_lines;
+        float uncovered_lines=qlc.uncovered_lines;
+        float line_coverage=qlc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        compLineCoverage.data[lengthof compLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= compLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyLineCoverageHistoryForSelectedComponent(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json compLineCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable ldt = sqlEndPoint.select(GET_SELECTED_COMPONENT_YEARLY_LINE_COVERAGE, params);
+    YearlyLineCoverage ylc;
+    while(ldt.hasNext()){
+        any row=ldt.getNext();
+        ylc, err = (YearlyLineCoverage)row;
+        var date=<string> ylc.year;
+        float lines_to_cover= ylc.lines_to_cover;
+        float covered_lines= ylc.covered_lines;
+        float uncovered_lines= ylc.uncovered_lines;
+        float line_coverage= ylc.line_coverage;
+        json history={"date":date,"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
+                         "uncovered_lines":uncovered_lines,"line_coverage":line_coverage};
+        compLineCoverage.data[lengthof compLineCoverage.data] = history;
+    }
+    ldt.close();
+
+    data.data= compLineCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+
 
 function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json configData)  {
     endpoint<sql:ClientConnector> sqlEndPoint {}
