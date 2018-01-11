@@ -1,5 +1,67 @@
 package org.wso2.internalapps.pqd;
 
+import ballerina.util;
+import ballerina.data.sql;
+import ballerina.log;
+
+
+struct Areas{
+    int pqd_area_id;
+    string pqd_area_name;
+}
+
+struct Components{
+    int pqd_component_id;
+    string pqd_component_name;
+    int pqd_product_id;
+    string sonar_project_key;
+}
+
+struct Products{
+    int pqd_product_id;
+    string pqd_product_name;
+}
+
+
+struct LineCoverageDetails{
+    int lines_to_cover;
+    int covered_lines;
+    int uncovered_lines;
+    float line_coverage;
+}
+struct DailyLineCoverage{
+    string date;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct MonthlyLineCoverage{
+    int year;
+    int month;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct QuarterlyLineCoverage{
+    int year;
+    int quarter;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
+
+struct YearlyLineCoverage{
+    int year;
+    float lines_to_cover;
+    float covered_lines;
+    float uncovered_lines;
+    float line_coverage;
+}
 function getAllAreaLineCoverage () (json) {
     endpoint<sql:ClientConnector> sqlEndPoint{}
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
@@ -10,12 +72,12 @@ function getAllAreaLineCoverage () (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
-    LinecoverageSnapshots ss;
+    CoverageSnapshots ss;
     int snapshot_id;
     TypeCastError err;
     while (ssdt.hasNext()) {
         any row = ssdt.getNext();
-        ss, err = (LinecoverageSnapshots)row;
+        ss, err = (CoverageSnapshots)row;
         snapshot_id= ss.snapshot_id;
     }
     ssdt.close();
@@ -93,12 +155,12 @@ function getSelectedAreaLineCoverage (int areaId) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
-    LinecoverageSnapshots ss;
+    CoverageSnapshots ss;
     int snapshot_id;
     TypeCastError err;
     while (ssdt.hasNext()) {
         any row = ssdt.getNext();
-        ss, err = (LinecoverageSnapshots)row;
+        ss, err = (CoverageSnapshots)row;
         snapshot_id= ss.snapshot_id;
     }
     ssdt.close();
@@ -180,12 +242,12 @@ function getSelectedProductLineCoverage (int productId) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
-    LinecoverageSnapshots ss;
+    CoverageSnapshots ss;
     int snapshot_id;
     TypeCastError err;
     while (ssdt.hasNext()) {
         any row = ssdt.getNext();
-        ss, err = (LinecoverageSnapshots)row;
+        ss, err = (CoverageSnapshots)row;
         snapshot_id= ss.snapshot_id;
     }
     ssdt.close();
@@ -255,12 +317,12 @@ function getSelectedComponentLineCoverage (int componentId) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID,params);
-    LinecoverageSnapshots ss;
+    CoverageSnapshots ss;
     int snapshot_id;
     TypeCastError err;
     while (ssdt.hasNext()) {
         any row = ssdt.getNext();
-        ss, err = (LinecoverageSnapshots)row;
+        ss, err = (CoverageSnapshots)row;
         snapshot_id= ss.snapshot_id;
     }
     ssdt.close();
@@ -923,12 +985,12 @@ function saveLineCoverageToDatabase (json projects,http:HttpClient sonarcon,json
         if(ret != 0){
             params = [];
             datatable dt = sqlEndPoint.select(GET_LINECOVERAGE_SNAPSHOT_ID, params);
-            LinecoverageSnapshots ss;
+            CoverageSnapshots ss;
             int snapshot_id;
             TypeCastError err;
             while (dt.hasNext()) {
                 any row = dt.getNext();
-                ss, err = (LinecoverageSnapshots )row;
+                ss, err = (CoverageSnapshots)row;
                 snapshot_id = ss.snapshot_id;
             }
             dt.close();

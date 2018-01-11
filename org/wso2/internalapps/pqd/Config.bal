@@ -2124,7 +2124,7 @@ const string GET_SELECTED_COMPONENT_YEARLY_LINE_COVERAGE="SELECT year(date) as y
 
 const string GET_FUNCCOVERAGE_SNAPSHOT_ID="SELECT snapshot_id FROM functional_coverage_snapshot ORDER BY snapshot_id DESC LIMIT 1";
 
-const string GET_TESTLINKPRODUCT_OF_AREA ="SELECT pqd_product_id,pqd_product_name,testlink_project_name FROM pqd_product WHERE pqd_area_id=?";
+const string GET_TESTLINKPRODUCT_OF_AREA ="SELECT pqd_product_name,testlink_project_name FROM pqd_product WHERE pqd_area_id=?";
 
 const string GET_FUNC_COVERAGE_DETAILS="SELECT project_name,test_plan_name,total_features,passed_features,failed_features,blocked_features,not_run_features,"+
                                         "functional_coverage FROM daily_functional_coverage WHERE project_name=? and snapshot_id=?";
