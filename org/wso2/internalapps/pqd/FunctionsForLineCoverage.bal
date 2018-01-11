@@ -5,11 +5,6 @@ import ballerina.data.sql;
 import ballerina.log;
 
 
-struct Areas{
-    int pqd_area_id;
-    string pqd_area_name;
-}
-
 struct Components{
     int pqd_component_id;
     string pqd_component_name;
@@ -128,14 +123,15 @@ function getAllAreaLineCoverage () (json) {
         allAreaLinesToCover=allAreaLinesToCover+lines_to_cover;
         allAreaCoveredLines=allAreaCoveredLines+covered_lines;
         allAreaUncoveredLines=allAreaUncoveredLines+uncovered_lines;
-        if(allAreaLinesToCover!=0){
-            allAreaLineCoverage=((float)allAreaCoveredLines /(float)allAreaLinesToCover) * 100;
-        }
+
         json area_line_coverage = {"name":area_name, "id":area_id, "lc":{"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
                                                                             "uncovered_lines":uncovered_lines,"line_coverage":line_coevrage}};
         lineCoverage.items[lengthof lineCoverage.items]=area_line_coverage;
     }
     dt.close();
+    if(allAreaLinesToCover!=0){
+        allAreaLineCoverage=((float)allAreaCoveredLines /(float)allAreaLinesToCover) * 100;
+    }
     lineCoverage.line_cov= {"lines_to_cover":allAreaLinesToCover,"covered_lines":allAreaCoveredLines,
                                "uncovered_lines":allAreaUncoveredLines,"line_coverage":allAreaLineCoverage};
 
@@ -215,14 +211,15 @@ function getSelectedAreaLineCoverage (int areaId) (json) {
         selectedAreaLinesToCover = selectedAreaLinesToCover + lines_to_cover;
         selectedAreaCoveredLines = selectedAreaCoveredLines + covered_lines;
         selectedAreaUncoveredLines = selectedAreaUncoveredLines + uncovered_lines;
-        if(selectedAreaLinesToCover != 0) {
-            selectedAreaLineCoverage = ((float)selectedAreaCoveredLines / (float)selectedAreaLinesToCover) * 100;
-        }
+
         json product_line_coverage = {"name":product_name, "id":product_id, "lc":{"lines_to_cover":lines_to_cover,"covered_lines":covered_lines,
                                                                                      "uncovered_lines":uncovered_lines,"line_coverage":line_coevrage}};
         lineCoverage.items[lengthof lineCoverage.items]=product_line_coverage;
     }
     dt.close();
+    if(selectedAreaLinesToCover != 0) {
+        selectedAreaLineCoverage = ((float)selectedAreaCoveredLines / (float)selectedAreaLinesToCover) * 100;
+    }
     lineCoverage.line_cov= {"lines_to_cover":selectedAreaLinesToCover, "covered_lines":selectedAreaCoveredLines,
                                "uncovered_lines":selectedAreaUncoveredLines, "line_coverage":selectedAreaLineCoverage};
 
