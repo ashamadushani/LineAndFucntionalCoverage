@@ -21,6 +21,36 @@ struct FunctionalCoverageDetails{
     float functional_coverage;
 }
 
+struct DailyFunctionalCoverage{
+    string date;
+    int total_features;
+    int passed_features;
+    float functional_coverage;
+}
+
+struct MonthlyFunctionalCoverage{
+    int year;
+    int month;
+    float total_features;
+    float passed_features;
+    float functional_coverage;
+}
+
+struct QuarterlyFunctionalCoverage{
+    int year;
+    int quarter;
+    float total_features;
+    float passed_features;
+    float functional_coverage;
+}
+
+struct YearlyFunctionalCoverage{
+    int quarter;
+    float total_features;
+    float passed_features;
+    float functional_coverage;
+}
+
 function getAllAreaFuncCoverage () (json) {
     endpoint<sql:ClientConnector> sqlEndPoint{}
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
@@ -235,6 +265,436 @@ function getSelectedProductFuncCoverage (int productId) (json) {
     funcCoverage.func_cov = {"total_features":totalFeatures, "passed_features":passedFeatures, "functional_coverage":functionalCoverage};
 
     data.data= funcCoverage;
+    sqlEndPoint.close();
+    return data;
+}
+
+
+
+function getDailyFuncCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasFuncCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_ALL_AREA_DAILY_FUNC_COVERAGE, params);
+    DailyFunctionalCoverage dfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        dfc, err = (DailyFunctionalCoverage)row;
+        string date= dfc.date;
+        int total_features= dfc.total_features;
+        int passed_features= dfc.passed_features;
+        float functional_coverage= dfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        allAreasFuncCoverage.data[lengthof allAreasFuncCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= allAreasFuncCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyFuncCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasFuncCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_ALL_AREA_MONTHLY_FUNC_COVERAGE, params);
+    MonthlyFunctionalCoverage mfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        mfc, err = (MonthlyFunctionalCoverage )row;
+        string date= mfc.year + "-" + mfc.month;
+        float total_features = mfc.total_features;
+        float passed_features = mfc.passed_features;
+        float functional_coverage = mfc.functional_coverage;
+        json history={"date":date,"total_features":total_features, "passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        allAreasFuncCoverage.data[lengthof allAreasFuncCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= allAreasFuncCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyFuncCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_ALL_AREA_QUARTERLY_FUNC_COVERAGE, params);
+    QuarterlyFunctionalCoverage qfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        qfc, err = (QuarterlyFunctionalCoverage )row;
+        string date= qfc.year + "-Q" + qfc.quarter;
+        float total_features = qfc.total_features;
+        float passed_features = qfc.passed_features;
+        float functional_coverage = qfc.line_coverage;
+        json history={"date":date,"total_features":total_features, "passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        allAreasFunctionalCoverage.data[lengthof allAreasFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= allAreasFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyFuncCoverageHistoryForAllArea(string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json allAreasFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_ALL_AREA_YEARLY_FUNC_COVERAGE, params);
+    YearlyFunctionalCoverage yfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        yfc, err = (YearlyFunctionalCoverage)row;
+        var date=<string>yfc.year;
+        float total_features = yfc.total_features;
+        float passed_features = yfc.passed_features;
+        float functional_coverage = yfc.line_coverage;
+        json history={"date":date,"total_features":total_features, "passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        allAreasFunctionalCoverage.data[lengthof allAreasFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= allAreasFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyFuncCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_DAILTY_FUNC_COVERAGE, params);
+    DailyFunctionalCoverage dfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        dfc, err = (DailyFunctionalCoverage)row;
+        string date= dfc.date;
+        int total_features= dfc.total_features;
+        int passed_features= dfc.passed_features;
+        float functional_coverage= dfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        areaFunctionalCoverage.data[lengthof areaFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= areaFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyFuncCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_MONTHLY_FUNC_COVERAGE, params);
+    MonthlyFunctionalCoverage mfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        mfc, err = (MonthlyFunctionalCoverage)row;
+        string date= mfc.year + "-" + mfc.month;
+        int total_features= mfc.total_features;
+        int passed_features= mfc.passed_features;
+        float functional_coverage= mfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        areaFunctionalCoverage.data[lengthof areaFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= areaFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyFuncCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_QUARTERLY_FUNC_COVERAGE, params);
+    QuarterlyFunctionalCoverage qfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        qfc, err = (QuarterlyFunctionalCoverage)row;
+        string date= qfc.year + "-Q" + qfc.quarter;
+        int total_features= qfc.total_features;
+        int passed_features= qfc.passed_features;
+        float functional_coverage= qfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        areaFunctionalCoverage.data[lengthof areaFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= areaFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyFuncCoverageHistoryForSelectedArea(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json areaFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_DAILTY_FUNC_COVERAGE, params);
+    YearlyFunctionalCoverage yfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        yfc, err = (YearlyFunctionalCoverage)row;
+        var date=<string>yfc.year;
+        int total_features= yfc.total_features;
+        int passed_features= yfc.passed_features;
+        float functional_coverage= yfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        areaFunctionalCoverage.data[lengthof areaFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= areaFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getDailyFuncCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE, params);
+    MonthlyFunctionalCoverage mfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        mfc, err = (MonthlyFunctionalCoverage)row;
+        string date= mfc.year + "-" + mfc.month;
+        int total_features= mfc.total_features;
+        int passed_features= mfc.passed_features;
+        float functional_coverage= mfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        productFunctionalCoverage.data[lengthof productFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= productFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getMonthlyFuncCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE, params);
+    DailyFunctionalCoverage dfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        dfc, err = (DailyFunctionalCoverage)row;
+        string date= dfc.date;
+        int total_features= dfc.total_features;
+        int passed_features= dfc.passed_features;
+        float functional_coverage= dfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        productFunctionalCoverage.data[lengthof productFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= productFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getQuarterlyFuncCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_QUARTERLY_FUNC_COVERAGE, params);
+    QuarterlyFunctionalCoverage qfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        qfc, err = (QuarterlyFunctionalCoverage)row;
+        string date= qfc.year + "-Q" + qfc.quarter;
+        int total_features= qfc.total_features;
+        int passed_features= qfc.passed_features;
+        float functional_coverage= qfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        productFunctionalCoverage.data[lengthof productFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= productFunctionalCoverage.data;
+    sqlEndPoint.close();
+    return data;
+}
+
+function getYearlyFuncCoverageHistoryForSelectedProduct(int selected,string start,string end)(json){
+    endpoint<sql:ClientConnector> sqlEndPoint {
+    }
+
+    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
+    bind sqlCon with sqlEndPoint;
+
+    json data = {"error":false,"data":[]};
+    json productFunctionalCoverage = {"data":[]};
+    sql:Parameter[] params = [];
+    TypeCastError err;
+
+    sql:Parameter area_id={sqlType:sql:Type.INTEGER,value:selected};
+    sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
+    sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
+    params = [area_id,start_date_para,end_date_para];
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_YEARLY_FUNC_COVERAGE, params);
+    YearlyFunctionalCoverage yfc;
+    while(fcdt.hasNext()) {
+        any row= fcdt.getNext();
+        yfc, err = (YearlyFunctionalCoverage)row;
+        var date=<string>yfc.year;
+        int total_features= yfc.total_features;
+        int passed_features= yfc.passed_features;
+        float functional_coverage= yfc.functional_coverage;
+        json history={"date":date,"total_features":total_features,"passed_features":passed_features,
+                         "functional_coverage":functional_coverage};
+        productFunctionalCoverage.data[lengthof productFunctionalCoverage.data] = history;
+    }
+    fcdt.close();
+
+    data.data= productFunctionalCoverage.data;
     sqlEndPoint.close();
     return data;
 }
