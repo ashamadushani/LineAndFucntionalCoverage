@@ -1,8 +1,6 @@
 package org.wso2.internalapps.pqd;
 
-import ballerina.util;
 import ballerina.data.sql;
-import ballerina.log;
 
 struct TestProjects{
     int pqd_product_id;
@@ -23,8 +21,8 @@ struct FunctionalCoverageDetails{
 
 struct DailyFunctionalCoverage{
     string date;
-    int total_features;
-    int passed_features;
+    float total_features;
+    float passed_features;
     float functional_coverage;
 }
 
@@ -45,7 +43,7 @@ struct QuarterlyFunctionalCoverage{
 }
 
 struct YearlyFunctionalCoverage{
-    int quarter;
+    int year;
     float total_features;
     float passed_features;
     float functional_coverage;
@@ -292,8 +290,8 @@ function getDailyFuncCoverageHistoryForAllArea(string start,string end)(json){
         any row= fcdt.getNext();
         dfc, err = (DailyFunctionalCoverage)row;
         string date= dfc.date;
-        int total_features= dfc.total_features;
-        int passed_features= dfc.passed_features;
+        float total_features= dfc.total_features;
+        float passed_features= dfc.passed_features;
         float functional_coverage= dfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -364,7 +362,7 @@ function getQuarterlyFuncCoverageHistoryForAllArea(string start,string end)(json
         string date= qfc.year + "-Q" + qfc.quarter;
         float total_features = qfc.total_features;
         float passed_features = qfc.passed_features;
-        float functional_coverage = qfc.line_coverage;
+        float functional_coverage = qfc.functional_coverage;
         json history={"date":date,"total_features":total_features, "passed_features":passed_features,
                          "functional_coverage":functional_coverage};
         allAreasFunctionalCoverage.data[lengthof allAreasFunctionalCoverage.data] = history;
@@ -399,7 +397,7 @@ function getYearlyFuncCoverageHistoryForAllArea(string start,string end)(json){
         var date=<string>yfc.year;
         float total_features = yfc.total_features;
         float passed_features = yfc.passed_features;
-        float functional_coverage = yfc.line_coverage;
+        float functional_coverage = yfc.functional_coverage;
         json history={"date":date,"total_features":total_features, "passed_features":passed_features,
                          "functional_coverage":functional_coverage};
         allAreasFunctionalCoverage.data[lengthof allAreasFunctionalCoverage.data] = history;
@@ -433,8 +431,8 @@ function getDailyFuncCoverageHistoryForSelectedArea(int selected,string start,st
         any row= fcdt.getNext();
         dfc, err = (DailyFunctionalCoverage)row;
         string date= dfc.date;
-        int total_features= dfc.total_features;
-        int passed_features= dfc.passed_features;
+        float total_features= dfc.total_features;
+        float passed_features= dfc.passed_features;
         float functional_coverage= dfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -469,8 +467,8 @@ function getMonthlyFuncCoverageHistoryForSelectedArea(int selected,string start,
         any row= fcdt.getNext();
         mfc, err = (MonthlyFunctionalCoverage)row;
         string date= mfc.year + "-" + mfc.month;
-        int total_features= mfc.total_features;
-        int passed_features= mfc.passed_features;
+        float total_features= mfc.total_features;
+        float passed_features= mfc.passed_features;
         float functional_coverage= mfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -505,8 +503,8 @@ function getQuarterlyFuncCoverageHistoryForSelectedArea(int selected,string star
         any row= fcdt.getNext();
         qfc, err = (QuarterlyFunctionalCoverage)row;
         string date= qfc.year + "-Q" + qfc.quarter;
-        int total_features= qfc.total_features;
-        int passed_features= qfc.passed_features;
+        float total_features= qfc.total_features;
+        float passed_features= qfc.passed_features;
         float functional_coverage= qfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -535,14 +533,14 @@ function getYearlyFuncCoverageHistoryForSelectedArea(int selected,string start,s
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
     sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
     params = [area_id,start_date_para,end_date_para];
-    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_DAILTY_FUNC_COVERAGE, params);
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_AREA_YEARLY_FUNC_COVERAGE, params);
     YearlyFunctionalCoverage yfc;
     while(fcdt.hasNext()) {
         any row= fcdt.getNext();
         yfc, err = (YearlyFunctionalCoverage)row;
         var date=<string>yfc.year;
-        int total_features= yfc.total_features;
-        int passed_features= yfc.passed_features;
+        float total_features= yfc.total_features;
+        float passed_features= yfc.passed_features;
         float functional_coverage= yfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -572,14 +570,14 @@ function getDailyFuncCoverageHistoryForSelectedProduct(int selected,string start
     sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
     params = [area_id,start_date_para,end_date_para];
     datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE, params);
-    MonthlyFunctionalCoverage mfc;
+    DailyFunctionalCoverage dfc;
     while(fcdt.hasNext()) {
         any row= fcdt.getNext();
-        mfc, err = (MonthlyFunctionalCoverage)row;
-        string date= mfc.year + "-" + mfc.month;
-        int total_features= mfc.total_features;
-        int passed_features= mfc.passed_features;
-        float functional_coverage= mfc.functional_coverage;
+        dfc, err = (DailyFunctionalCoverage )row;
+        string date= dfc.date;
+        float total_features= dfc.total_features;
+        float passed_features= dfc.passed_features;
+        float functional_coverage= dfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
         productFunctionalCoverage.data[lengthof productFunctionalCoverage.data] = history;
@@ -607,14 +605,14 @@ function getMonthlyFuncCoverageHistoryForSelectedProduct(int selected,string sta
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
     sql:Parameter end_date_para = {sqlType:sql:Type.VARCHAR, value:end};
     params = [area_id,start_date_para,end_date_para];
-    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE, params);
+    datatable fcdt = sqlEndPoint.select(GET_SELECTED_PRODUCT_MONTHLY_FUNC_COVERAGE, params);
     DailyFunctionalCoverage dfc;
     while(fcdt.hasNext()) {
         any row= fcdt.getNext();
         dfc, err = (DailyFunctionalCoverage)row;
         string date= dfc.date;
-        int total_features= dfc.total_features;
-        int passed_features= dfc.passed_features;
+        float total_features= dfc.total_features;
+        float passed_features= dfc.passed_features;
         float functional_coverage= dfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -649,8 +647,8 @@ function getQuarterlyFuncCoverageHistoryForSelectedProduct(int selected,string s
         any row= fcdt.getNext();
         qfc, err = (QuarterlyFunctionalCoverage)row;
         string date= qfc.year + "-Q" + qfc.quarter;
-        int total_features= qfc.total_features;
-        int passed_features= qfc.passed_features;
+        float total_features= qfc.total_features;
+        float passed_features= qfc.passed_features;
         float functional_coverage= qfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};
@@ -685,8 +683,8 @@ function getYearlyFuncCoverageHistoryForSelectedProduct(int selected,string star
         any row= fcdt.getNext();
         yfc, err = (YearlyFunctionalCoverage)row;
         var date=<string>yfc.year;
-        int total_features= yfc.total_features;
-        int passed_features= yfc.passed_features;
+        float total_features= yfc.total_features;
+        float passed_features= yfc.passed_features;
         float functional_coverage= yfc.functional_coverage;
         json history={"date":date,"total_features":total_features,"passed_features":passed_features,
                          "functional_coverage":functional_coverage};

@@ -2,8 +2,10 @@ package org.wso2.internalapps.pqd;
 
 import ballerina.net.http;
 
+
+
 @http:configuration {
-    basePath:"/internal/product-quality/v1.0/functional-coverage",
+    basePath:"/internal/product-quality/v1.0/coverage",
     httpsPort:9092,
     keyStoreFile:"${ballerina.home}/bre/security/ballerinaKeystore.p12",
     keyStorePassword:"ballerina",
@@ -13,22 +15,22 @@ import ballerina.net.http;
     ciphers:"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
     sslEnabledProtocols:"TLSv1.2,TLSv1.1"
 }
-service<http> FunctionalCoverageService {
+service<http> CoverageService {
     json configData = getConfigData(CONFIG_PATH);
 
     @http:resourceConfig {
         methods:["GET"],
         path:"/{category}/{categoryId}"
     }
-    resource getFunctionalCoverage(http:Request request, http:Response response,string category, string categoryId){
+    resource getCoverage(http:Request request, http:Response response,string category, string categoryId){
         var selected,_=<int>categoryId;
         json returnJson;
         if(category=="all"){
-            returnJson = getAllAreaFuncCoverage();
+            returnJson = getAllAreaCoverage();
         }else if(category=="area"){
-            returnJson=getSelectedAreaFuncCoverage(selected);
+            returnJson=getSelectedAreaCoverage(selected);
         }else if(category=="product"){
-            returnJson=getSelectedProductFuncCoverage(selected);
+            returnJson=getSelectedProductCoverage(selected);
         }else{
             returnJson={"error":true};
         }
@@ -41,7 +43,7 @@ service<http> FunctionalCoverageService {
         methods:["GET"],
         path:"/history/{category}/{categoryId}"
     }
-    resource getFunctionalCoverageHistory(http:Request request,http:Response response, string category, string categoryId){
+    resource getCoverageHistory(http:Request request,http:Response response, string category, string categoryId){
         json returnJson;
         map params = request.getQueryParams();
         var start,_=(string)params.dateFrom;
@@ -50,37 +52,37 @@ service<http> FunctionalCoverageService {
         var selected,_=<int>categoryId;
         if(category=="all"){
             if(period=="day"){
-                returnJson=getDailyFuncCoverageHistoryForAllArea(start,end);
+                returnJson=getDailyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyFuncCoverageHistoryForAllArea(start,end);
+                returnJson=getMonthlyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyFuncCoverageHistoryForAllArea(start,end);
+                returnJson=getQuarterlyLineCoverageHistoryForAllArea(start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyFuncCoverageHistoryForAllArea(start,end);
+                returnJson=getYearlyLineCoverageHistoryForAllArea(start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="area"){
             if(period=="day"){
-                returnJson=getDailyFuncCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getDailyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getMonthlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getQuarterlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getYearlyLineCoverageHistoryForSelectedArea(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="product"){
             if(period=="day"){
-                returnJson=getDailyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getDailyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getMonthlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getQuarterlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getYearlyLineCoverageHistoryForSelectedProduct(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
@@ -92,3 +94,5 @@ service<http> FunctionalCoverageService {
         _ = response.send();
     }
 }
+
+

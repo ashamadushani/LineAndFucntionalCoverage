@@ -2131,7 +2131,7 @@ const string GET_TESTLINKPRODUCT_OF_PRODUCT ="SELECT pqd_product_id,pqd_product_
 const string GET_FUNC_COVERAGE_DETAILS="SELECT project_name,test_plan_name,total_features,passed_features,failed_features,blocked_features,not_run_features,"+
                                         "functional_coverage FROM daily_functional_coverage WHERE project_name=? and snapshot_id=?";
 
-const string GET_ALL_AREA_DAILY_FUNC_COVERAGE="SELECT date,SUM(total_features) as total_feature,SUM(passed_features) as passed_features"+
+const string GET_ALL_AREA_DAILY_FUNC_COVERAGE="SELECT date,SUM(total_features) as total_features,SUM(passed_features) as passed_features"+
                                               ",(SUM(passed_features)/SUM(total_features))*100 as functional_coverage FROM daily_functional_coverage"+
                                               " as a INNER JOIN pqd_product as b ON a.project_name=b.testlink_project_name "+
                                               "where date between ? and ? group by date";
@@ -2159,7 +2159,7 @@ const string GET_ALL_AREA_YEARLY_FUNC_COVERAGE="SELECT year(date) as year,AVG(to
                                                "daily_functional_coverage as a INNER JOIN pqd_product as b ON a.project_name=b.testlink_project_name"+
                                                " where date between ? and ? group by date) as T group by year";
 
-const string GET_SELECTED_AREA_DAILTY_FUNC_COVERAGE = "SELECT date,SUM(total_features) as total_feature,SUM(passed_features) as passed_features," +
+const string GET_SELECTED_AREA_DAILTY_FUNC_COVERAGE = "SELECT date,SUM(total_features) as total_features,SUM(passed_features) as passed_features," +
                                               "(SUM(passed_features)/SUM(total_features))*100 as functional_coverage FROM daily_functional_coverage as"+
                                               " a INNER JOIN pqd_product as b ON a.project_name=b.testlink_project_name where pqd_area_id=? "+
                                               "and date between ? and ? group by date";
@@ -2187,7 +2187,7 @@ const string GET_SELECTED_AREA_YEARLY_FUNC_COVERAGE="SELECT year(date) as year,A
                                                "daily_functional_coverage as a INNER JOIN pqd_product as b ON a.project_name=b.testlink_project_name"+
                                                " where pqd_area_id=? and date between ? and ? group by date) as T group by year";
 
-const string GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE = "SELECT date,SUM(total_features) as total_feature,SUM(passed_features) as passed_features," +
+const string GET_SELECTED_PRODUCT_DAILTY_FUNC_COVERAGE = "SELECT date,SUM(total_features) as total_features,SUM(passed_features) as passed_features," +
                                                           "(SUM(passed_features)/SUM(total_features))*100 as functional_coverage FROM daily_functional_coverage as"+
                                                           " a INNER JOIN pqd_product as b ON a.project_name=b.testlink_project_name where pqd_product_id=? "+
                                                           "and date between ? and ? group by date";
