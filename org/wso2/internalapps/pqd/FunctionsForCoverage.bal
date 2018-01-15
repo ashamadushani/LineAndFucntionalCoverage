@@ -67,4 +67,131 @@ function getSelectedProductCoverage(int productId)(json){
 function getDailyCoverageHistoryForAllArea (string start, string end) (json) {
     json lineCoverageJson=getDailyLineCoverageHistoryForAllArea(start,end);
     json functionalCoverageJson=getDailyFuncCoverageHistoryForAllArea(start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getMonthlyCoverageHistoryForAllArea (string start, string end) (json) {
+    json lineCoverageJson=getMonthlyLineCoverageHistoryForAllArea(start,end);
+    json functionalCoverageJson=getMonthlyFuncCoverageHistoryForAllArea(start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getQuarterlyCoverageHistoryForAllArea (string start, string end) (json) {
+     json lineCoverageJson=getQuarterlyLineCoverageHistoryForAllArea(start,end);
+     json functionalCoverageJson=getQuarterlyFuncCoverageHistoryForAllArea(start,end);
+     json data = {"error":false, "data":[]};
+     json coverageJson={"lc":[],"fc":[]};
+     coverageJson.lc=lineCoverageJson.data;
+     coverageJson.fc=functionalCoverageJson.data;
+     data.data=coverageJson;
+     return data;
+}
+
+function getYearlyCoverageHistoryForAllArea (string start, string end) (json) {
+    json lineCoverageJson=getYearlyLineCoverageHistoryForAllArea(start,end);
+    json functionalCoverageJson=getYearlyFuncCoverageHistoryForAllArea(start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getDailyCoverageHistoryForSelectedArea (int selected,string start, string end) (json) {
+    json lineCoverageJson=getDailyLineCoverageHistoryForSelectedArea(selected,start,end);
+    json functionalCoverageJson=getDailyFuncCoverageHistoryForSelectedArea(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getMonthlyCoverageHistoryForSelectedArea (int selected,string start, string end) (json) {
+    json lineCoverageJson=getMonthlyLineCoverageHistoryForSelectedArea(selected,start,end);
+    json functionalCoverageJson=getMonthlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getQuarterlyCoverageHistoryForSelectedArea (int selected,string start, string end) (json) {
+    json lineCoverageJson=getQuarterlyLineCoverageHistoryForSelectedArea(selected,start,end);
+    json functionalCoverageJson=getQuarterlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getYearlyCoverageHistoryForSelectedArea (int selected,string start, string end) (json) {
+    json lineCoverageJson=getYearlyLineCoverageHistoryForSelectedArea(selected,start,end);
+    json functionalCoverageJson=getYearlyFuncCoverageHistoryForSelectedArea(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getDailyCoverageHistoryForSelectedProduct (int selected,string start, string end) (json) {
+    json lineCoverageJson=getDailyLineCoverageHistoryForSelectedProduct(selected,start,end);
+    json functionalCoverageJson=getDailyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getMonthlyCoverageHistoryForSelectedProduct (int selected,string start, string end) (json) {
+    json lineCoverageJson=getMonthlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+    json functionalCoverageJson=getMonthlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getQuarterlyCoverageHistoryForSelectedProduct (int selected,string start, string end) (json) {
+    json lineCoverageJson=getQuarterlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+    json functionalCoverageJson=getQuarterlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
+}
+
+function getYearlyCoverageHistoryForSelectedProduct (int selected,string start, string end) (json) {
+    json lineCoverageJson=getYearlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+    json functionalCoverageJson=getYearlyFuncCoverageHistoryForSelectedProduct(selected,start,end);
+    json data = {"error":false, "data":[]};
+    json coverageJson={"lc":[],"fc":[]};
+    coverageJson.lc=lineCoverageJson.data;
+    coverageJson.fc=functionalCoverageJson.data;
+    data.data=coverageJson;
+    return data;
 }

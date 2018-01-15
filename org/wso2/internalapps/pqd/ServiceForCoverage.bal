@@ -52,37 +52,37 @@ service<http> CoverageService {
         var selected,_=<int>categoryId;
         if(category=="all"){
             if(period=="day"){
-                returnJson=getDailyLineCoverageHistoryForAllArea(start,end);
+                returnJson=getDailyCoverageHistoryForAllArea(start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyLineCoverageHistoryForAllArea(start,end);
+                returnJson=getMonthlyCoverageHistoryForAllArea(start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyLineCoverageHistoryForAllArea(start,end);
+                returnJson=getQuarterlyCoverageHistoryForAllArea(start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyLineCoverageHistoryForAllArea(start,end);
+                returnJson=getYearlyCoverageHistoryForAllArea(start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="area"){
             if(period=="day"){
-                returnJson=getDailyLineCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getDailyCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyLineCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getMonthlyCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyLineCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getQuarterlyCoverageHistoryForSelectedArea(selected,start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyLineCoverageHistoryForSelectedArea(selected,start,end);
+                returnJson=getYearlyCoverageHistoryForSelectedArea(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
         }else if(category=="product"){
             if(period=="day"){
-                returnJson=getDailyLineCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getDailyCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Month"){
-                returnJson=getMonthlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getMonthlyCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Quarter"){
-                returnJson=getQuarterlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getQuarterlyCoverageHistoryForSelectedProduct(selected,start,end);
             }else if(period=="Year"){
-                returnJson=getYearlyLineCoverageHistoryForSelectedProduct(selected,start,end);
+                returnJson=getYearlyCoverageHistoryForSelectedProduct(selected,start,end);
             }else{
                 returnJson={"error":true};
             }
