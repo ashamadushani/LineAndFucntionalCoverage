@@ -47,7 +47,7 @@ function getSelectedAreaCoverage(int areaId)(json){
     coverageJson.line_cov =lineCoverageJson.data.line_cov;
     coverageJson.func_cov=functionalCoverageJson.data.func_cov;
     data.data = coverageJson;
-    return coverageJson;
+    return data;
 }
 
 function getSelectedProductCoverage(int productId)(json){
