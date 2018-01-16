@@ -19,7 +19,7 @@ function getAllAreaCoverage()(json){
     while (index<loopSize) {
         json item={"name":lineCoverageJson.data.items[index].name,"id":lineCoverageJson.data.items[index].id,
                   "lc":lineCoverageJson.data.items[index].lc,"fc":functionalCoverageJson.data.items[index].fc};
-        data.items[index] = item;
+        coverageJson.items[index] = item;
 
         index=index+1;
     }
@@ -40,7 +40,7 @@ function getSelectedAreaCoverage(int areaId)(json){
     while (index<loopSize) {
         json item={"name":lineCoverageJson.data.items[index].name,"id":lineCoverageJson.data.items[index].id,
                       "lc":lineCoverageJson.data.items[index].lc,"fc":functionalCoverageJson.data.items[index].fc};
-        data.items[index] = item;
+        coverageJson.items[index] = item;
 
         index=index+1;
     }

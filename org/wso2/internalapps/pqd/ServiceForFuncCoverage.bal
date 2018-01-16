@@ -34,6 +34,7 @@ service<http> FunctionalCoverageService {
         }
 
         response.setJsonPayload(returnJson);
+        response.setHeader("Access-Control-Allow-Origin", "*");
         _ = response.send();
     }
 
@@ -89,6 +90,7 @@ service<http> FunctionalCoverageService {
         }
 
         response.setJsonPayload(returnJson);
+        response.setHeader("Access-Control-Allow-Origin", "*");
         _ = response.send();
     }
 }

@@ -27,6 +27,7 @@ service<http> LineCoverageService {
         json sonarResponse = getDataFromSonar(sonarCon,path,configData);
         saveLineCoverageToDatabase(sonarResponse,sonarCon,configData);
         response.setStringPayload("Fetchin data from sonar begun at "+currentTime().format("yyyy-MM-dd  HH:mm:ss"));
+        response.setHeader("Access-Control-Allow-Origin", "*");
          _ = response.send();
     }
 
@@ -50,6 +51,7 @@ service<http> LineCoverageService {
         }
 
         response.setJsonPayload(returnJson);
+        response.setHeader("Access-Control-Allow-Origin", "*");
         _ = response.send();
     }
 
@@ -117,6 +119,7 @@ service<http> LineCoverageService {
         }
 
         response.setJsonPayload(returnJson);
+        response.setHeader("Access-Control-Allow-Origin", "*");
         _ = response.send();
     }
 }
